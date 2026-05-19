@@ -1,5 +1,5 @@
 #include "Grafo.hpp"
-
+#include <iostream>
 Grafo::Grafo(){
     capacidade = 0;
     direcionado = false;
@@ -144,13 +144,138 @@ void Grafo::remover_aresta(int origem, int destino){
     }
 }
 void Grafo::remover_vertice(int id_vertice){
-    
+    if(id_vertice<0 || id_vertice >=0)
+        return;
+    if(!ativo[id_vertice])
+        return;
+    if(representacao=='L'){
+        //Removendo arestas saindo do vértice
+        while(listas[id_vertice]!=nullptr){
+            Aresta* temp = listas[id_vertice];
+            listas[id_vertice] = listas[id_vertice]->prox;
+            delete temp;
+        }
+        //Removendo arestas entrando no vértice
+        for(int i=0; i<capacidade; i++){
+            if(ativo[i] && i != id_vertice){
+                remover_aresta(i, id_vertice);
+            }
+        }
+    }
+    ativo[id_vertice] = 0;
+    num_vertices--;
 }
 
 void Grafo::imprimir_grafo(){
-
+    if(representacao=='L'){
+        for(int i=0; i<capacidade; i++){
+            if(ativo[i]){
+                std::cout << i << ": ";
+                Aresta* atual = listas[i];
+                while(atual != nullptr){
+                    std::cout << atual->destino << " ";
+                    atual = atual->prox;
+                }
+                std::cout << std::endl;
+            }
+        }
+    }
 }
 
 void Grafo::mudar_representacao(char nova_representacao){
 
+    if(nova_representacao == representacao)
+        return;
+
+    // LISTA -> MATRIZ
+    if(representacao == 'L' && nova_representacao == 'M'){
+
+        int** nova_matriz = new int*[capacidade];
+
+        for(int i = 0; i < capacidade; i++){
+
+            nova_matriz[i] = new int[capacidade];
+
+            for(int j = 0; j < capacidade; j++){
+                nova_matriz[i][j] = 0;
+            }
+        }
+
+        // copiar arestas
+        for(int i = 0; i < capacidade; i++){
+
+            Aresta* atual = listas[i];
+
+            while(atual != nullptr){
+
+                nova_matriz[i][atual->destino] = 1;
+
+                atual = atual->prox;
+            }
+        }
+
+        // liberar listas antigas
+        for(int i = 0; i < capacidade; i++){
+
+            Aresta* atual = listas[i];
+
+            while(atual != nullptr){
+
+                Aresta* temp = atual;
+
+                atual = atual->prox;
+
+                delete temp;
+            }
+        }
+
+        delete[] listas;
+
+        listas = nullptr;
+
+        matriz = nova_matriz;
+
+        representacao = 'M';
+    }
+
+    // MATRIZ -> LISTA
+    else if(representacao == 'M' && nova_representacao == 'L'){
+
+        Aresta** novas_listas = new Aresta*[capacidade];
+
+        for(int i = 0; i < capacidade; i++){
+            novas_listas[i] = nullptr;
+        }
+
+        // copiar arestas
+        for(int i = 0; i < capacidade; i++){
+
+            for(int j = 0; j < capacidade; j++){
+
+                if(matriz[i][j] != 0){
+
+                    Aresta* nova = new Aresta;
+
+                    nova->destino = j;
+
+                    nova->prox = novas_listas[i];
+
+                    novas_listas[i] = nova;
+                }
+            }
+        }
+
+        // liberar matriz antiga
+        for(int i = 0; i < capacidade; i++){
+            delete[] matriz[i];
+        }
+
+        delete[] matriz;
+
+        matriz = nullptr;
+
+        listas = novas_listas;
+
+        representacao = 'L';
+    }
 }
