@@ -68,7 +68,7 @@ Grafo::~Grafo(){
 
 void Grafo::inserir_vertice(No no){
     int id_no = no.get_id();
-    if(id_no >= 0 && id_no < capacidade){
+    if(id_no >= 0 && id_no < capacidade && !ativo[id_no]){
         vertices[id_no] = no;
         ativo[id_no] = 1;
         num_vertices++;
@@ -80,7 +80,8 @@ void Grafo::inserir_aresta(int origem, int destino){
         return;
     if(!ativo[origem] || !ativo[destino])
         return;
-    //adicionar verificação se a aresta já existe
+    if(existe_aresta(origem, destino))
+        return;
     if(representacao == 'L'){
             Aresta* aresta = new Aresta;
             aresta->destino = destino;
@@ -92,11 +93,17 @@ void Grafo::inserir_aresta(int origem, int destino){
                 aresta2->prox = listas[destino];
                 listas[destino] = aresta2; 
             }
+    }else if(representacao=='M'){
+        matriz[origem][destino] = 1;
+        if(!direcionado)
+            matriz[destino][origem] = 1;
     }
 }
 bool Grafo::existe_aresta(int origem, int destino){
      if(origem < 0 || origem >= capacidade ||
        destino < 0 || destino >= capacidade)
+        return false;
+    if(!ativo[origem] || !ativo[destino])
         return false;
     if(representacao == 'L'){
         Aresta* atual = listas[origem];
@@ -107,7 +114,6 @@ bool Grafo::existe_aresta(int origem, int destino){
         }
         return false;
     }else if(representacao == 'M'){
-
         return matriz[origem][destino] != 0;
     }
     return false;
@@ -141,10 +147,14 @@ void Grafo::remover_aresta(int origem, int destino){
         if(!direcionado){
             remover_aresta_lista(destino, origem);
         }
+    }else if(representacao=='M'){
+        matriz[origem][destino]=0;
+        if(!direcionado)
+            matriz[destino][origem]=0;
     }
 }
 void Grafo::remover_vertice(int id_vertice){
-    if(id_vertice<0 || id_vertice >=0)
+    if(id_vertice < 0 || id_vertice >= capacidade)
         return;
     if(!ativo[id_vertice])
         return;
@@ -160,6 +170,16 @@ void Grafo::remover_vertice(int id_vertice){
             if(ativo[i] && i != id_vertice){
                 remover_aresta(i, id_vertice);
             }
+        }
+    }else if(representacao=='M'){
+        //removendo vertices entrando e saindo
+        for(int i=0; i<capacidade; i++){
+            if(ativo[i]&&i!=id_vertice){
+                remover_aresta(i, id_vertice);
+                if(direcionado)
+                    remover_aresta(id_vertice,i);
+            }
+
         }
     }
     ativo[id_vertice] = 0;
@@ -179,6 +199,15 @@ void Grafo::imprimir_grafo(){
                 std::cout << std::endl;
             }
         }
+    }else if(representacao=='M'){
+        for(int i=0; i<capacidade; i++){
+            if(!ativo[i])
+                continue;
+            for(int j=0; j<capacidade; j++){
+                std::cout << matriz[i][j] << "  ";
+            }
+            std::cout << std::endl;
+        }
     }
 }
 
@@ -186,7 +215,8 @@ void Grafo::mudar_representacao(char nova_representacao){
 
     if(nova_representacao == representacao)
         return;
-
+    if(nova_representacao != 'L' && nova_representacao != 'M')
+        return;
     // LISTA -> MATRIZ
     if(representacao == 'L' && nova_representacao == 'M'){
 
