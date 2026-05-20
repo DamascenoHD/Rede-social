@@ -14,8 +14,8 @@ SRCS = $(SRC_DIR)/main.cpp \
        $(SRC_DIR)/Dicionario.cpp \
        $(SRC_DIR)/Grafo.cpp \
        $(SRC_DIR)/Tema.cpp \
-       $(SRC_DIR)/Usuario.cpp
-
+       $(SRC_DIR)/Usuario.cpp \
+       $(SRC_DIR)/No.cpp
 # Objetos
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 

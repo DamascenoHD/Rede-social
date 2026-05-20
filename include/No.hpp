@@ -9,7 +9,7 @@ class No{
         No();
         No(int id, char tipo);
         
-         int get_id() const;
+        int get_id() const;
         char get_tipo() const;
 
         void set_id(int id);
