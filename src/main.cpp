@@ -57,27 +57,56 @@ int main() {
         cout << "U " << usuario.get_id() << endl;
 
         }else if(tipo=='S'){
-        
+            int id_1, id_2;
+            ss >> id_1 >> id_2;
+            grafo_social.inserir_aresta(id_1, id_2);
         }else if(tipo == 'R'){
-
+            int id_1, id_2;
+            ss >> id_1 >> id_2;
+            grafo_social.remover_aresta(id_1, id_2);//a remoção da aresta é direcionada, talvez seja necessário mudar
         }else if(tipo == 'L'){
             char subtipo;
+            int id_usuario;
             ss >> subtipo;
             if(subtipo == 'T'){
-
+                ss >> id_usuario;
+                //adicionar função listar em grafos
             }else if (subtipo == 'C'){
-
+                ss >> id_usuario;
+                //adicionar função listar em grafos
             }else if(subtipo == 'S'){
-
+                ss >> id_usuario;
+                //adicionar função listar em grafos
             }else if(subtipo == 'A'){
-
+                ss >> id_usuario;
+                //adicionar função listar em grafos
             }
         }else if(tipo == 'Q'){
-
+            int id_1, id_2;
+            int valor = 0;
+            ss >> id_1 >> id_2;
+            bool um_segue_2, dois_segue_1;
+            um_segue_2 = grafo_social.existe_aresta(id_1, id_2);
+            dois_segue_1 = grafo_social.existe_aresta(id_2, id_1);
+            if(um_segue_2 ^ dois_segue_1){
+                valor = 1;
+            }else if(um_segue_2 && dois_segue_1){
+                valor = 2;
+            }
+            cout << "Q " << dicionario.recuperar_usuario(id_1).get_nome() << " " << dicionario.recuperar_usuario(id_2).get_nome() << endl;
         }else if(tipo == 'G'){
-
+             int id_usuario, id_tema;
+             int valor = 0;
+             ss >> id_usuario >> id_tema;
+             if(grafo_temas.existe_aresta(id_usuario, id_tema))
+                valor = 1;
+            cout << "G " << dicionario.recuperar_usuario(id_usuario).get_nome() << " " << dicionario.recuperar_tema(id_tema).get_nome() << endl;
         }else if(tipo == 'F'){
-
+            int id_tema;
+            int quantidade = 0;
+            ss >> id_tema;
+            //fazer função que retorna quantos vértices to ligados nessa aresta
+            cout << "F " << dicionario.recuperar_tema(id_tema).get_nome() << " " << quantidade << endl;
         }
         
         

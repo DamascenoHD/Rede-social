@@ -28,16 +28,12 @@ class Grafo{
 
         void inserir_vertice(No no);
         void remover_vertice(int id_vertice);
-        //int obter_vertice(const char* rotulo);
-        //int vertice_ativo(int id);
-        //int vertice_adjacente(int vertice, int ultimo);
 
         void inserir_aresta(int origem, int destino);
         void remover_aresta_lista(int origem, int destino);
         void remover_aresta(int origem, int destino);
         bool existe_aresta(int origem, int destino);
-        //int obter_aresta(int origem, int destino);
-        
+ 
         void mudar_representacao(char nova_representacao);
 
         void aumentar_capacidade();
