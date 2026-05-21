@@ -9,11 +9,10 @@ struct Aresta {
 
 class Grafo{
     private:
-        int capacidade;
         bool direcionado;
         char representacao;
         int num_vertices;
-
+        int tamanho = 0;
         int* ativo;
         No* vertices;
         int** matriz; 
@@ -22,7 +21,7 @@ class Grafo{
 
     public:
         Grafo();
-        Grafo(int capacidade, bool direcionado, char representacao);
+        Grafo(bool direcionado, char representacao);
         ~Grafo();
 
         void imprimir_grafo();
@@ -40,6 +39,8 @@ class Grafo{
         //int obter_aresta(int origem, int destino);
         
         void mudar_representacao(char nova_representacao);
+
+        void aumentar_capacidade();
 
 };
 #endif

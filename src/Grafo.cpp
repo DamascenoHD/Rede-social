@@ -1,59 +1,38 @@
 #include "Grafo.hpp"
 #include <iostream>
 Grafo::Grafo(){
-    capacidade = 0;
     direcionado = false;
     representacao = '\0';
     num_vertices = 0;
-
+    tamanho = 0;
     ativo = nullptr;
     vertices = nullptr;
     matriz = nullptr;
     listas = nullptr;
 }
-Grafo::Grafo(int capacidade, bool direcionado, char representacao){
-    this->capacidade = capacidade;
+Grafo::Grafo(bool direcionado, char representacao){
     this->direcionado = direcionado;
     this->representacao = representacao;
-
+    tamanho = 0;
     num_vertices = 0;
 
-    vertices = new No[capacidade];
-    ativo = new int[capacidade];
-    for(int i = 0; i < capacidade; i++) {
-        ativo[i] = 0;
-    }
-    if(representacao=='L'){
-        listas = new Aresta*[capacidade];
-        for(int i = 0; i < capacidade; i++) {
-            listas[i] = nullptr;
-        }
-        matriz = nullptr;
-    }else if(representacao=='M'){
-        matriz = new int*[capacidade];
-        for(int i = 0; i < capacidade; i++) {
-            matriz[i] = new int[capacidade];
-            for(int j = 0; j < capacidade; j++) {
-                matriz[i][j] = 0;
-            }
-        }
-        listas = nullptr;
-    }else {
-        matriz = nullptr;
-        listas = nullptr;
-    }   
+    vertices = nullptr;
+    ativo = nullptr;
+    listas = nullptr;
+    matriz = nullptr;
+   
 }
 Grafo::~Grafo(){
     delete[] ativo;
     delete [] vertices;
     if(matriz != nullptr){
-        for(int i = 0; i < capacidade; i++) {
+        for(int i = 0; i < tamanho; i++) {
             delete[] matriz[i];
         }
         delete[] matriz;
     }
     if(listas != nullptr){
-        for(int i = 0; i < capacidade; i++) {
+        for(int i = 0; i < tamanho; i++) {
             Aresta* atual = listas[i];
             while(atual != nullptr) {
                 Aresta* temp = atual;
@@ -65,18 +44,102 @@ Grafo::~Grafo(){
     }
 }
 
-
 void Grafo::inserir_vertice(No no){
     int id_no = no.get_id();
-    if(id_no >= 0 && id_no < capacidade && !ativo[id_no]){
-        vertices[id_no] = no;
-        ativo[id_no] = 1;
-        num_vertices++;
+    if(id_no < 0)
+        return;
+    while(id_no >= tamanho) {
+        No* novo_vertices = new No[tamanho+1];
+        int* novo_ativo = new int[tamanho+1];
+
+        for(int i=0; i<tamanho+1; i++){
+            novo_ativo[i] = 0;
+        }
+
+        for(int i=0; i<tamanho; i++){
+            novo_vertices[i] = vertices[i];
+            novo_ativo[i] = ativo[i];
+        }
+        delete[] vertices;
+        delete[] ativo;
+
+        vertices = novo_vertices;
+        ativo = novo_ativo;
+        
+        if(representacao=='L'){
+            Aresta** novas_listas = new Aresta*[tamanho + 1];
+
+            for(int i = 0; i < tamanho + 1; i++){
+                novas_listas[i] = nullptr;
+            }
+
+            for(int i = 0; i < tamanho; i++){
+                novas_listas[i] = listas[i];
+            }
+
+            delete[] listas;
+
+            listas = novas_listas;
+        }else if(representacao=='M'){
+            int** nova_matriz = new int*[tamanho + 1];
+
+            for(int i = 0; i < tamanho + 1; i++){
+
+                nova_matriz[i] = new int[tamanho + 1];
+
+                for(int j = 0; j < tamanho + 1; j++){
+                    nova_matriz[i][j] = 0;
+                }
+            }
+
+            // copia matriz antiga
+            for(int i = 0; i < tamanho; i++){
+                for(int j = 0; j < tamanho; j++){
+                    nova_matriz[i][j] = matriz[i][j];
+                }
+            }
+
+            // libera antiga
+            for(int i = 0; i < tamanho; i++){
+                delete[] matriz[i];
+            }
+
+            delete[] matriz;
+
+            matriz = nova_matriz;
+        }
+        tamanho++;
     }
+    if(ativo[id_no])
+        return;
+
+    vertices[id_no] = no;
+    ativo[id_no] = 1;
+    num_vertices++;
+}
+
+bool Grafo::existe_aresta(int origem, int destino){
+     if(origem < 0 || origem >= tamanho ||
+       destino < 0 || destino >= tamanho)
+        return false;
+    if(!ativo[origem] || !ativo[destino])
+        return false;
+    if(representacao == 'L'){
+        Aresta* atual = listas[origem];
+        while(atual!=nullptr){
+            if(atual->destino==destino)
+                return true;
+            atual = atual->prox;
+        }
+        return false;
+    }else if(representacao == 'M'){
+        return matriz[origem][destino] != 0;
+    }
+    return false;
 }
 
 void Grafo::inserir_aresta(int origem, int destino){
-    if(origem< 0 || origem >= capacidade || destino < 0 || destino >= capacidade)
+    if(origem< 0 || origem >= tamanho || destino < 0 || destino >= tamanho)
         return;
     if(!ativo[origem] || !ativo[destino])
         return;
@@ -99,25 +162,7 @@ void Grafo::inserir_aresta(int origem, int destino){
             matriz[destino][origem] = 1;
     }
 }
-bool Grafo::existe_aresta(int origem, int destino){
-     if(origem < 0 || origem >= capacidade ||
-       destino < 0 || destino >= capacidade)
-        return false;
-    if(!ativo[origem] || !ativo[destino])
-        return false;
-    if(representacao == 'L'){
-        Aresta* atual = listas[origem];
-        while(atual!=nullptr){
-            if(atual->destino==destino)
-                return true;
-            atual = atual->prox;
-        }
-        return false;
-    }else if(representacao == 'M'){
-        return matriz[origem][destino] != 0;
-    }
-    return false;
-}
+
 void Grafo::remover_aresta_lista(int origem, int destino){
     Aresta* atual = listas[origem];
     Aresta* anterior = nullptr;
@@ -137,8 +182,8 @@ void Grafo::remover_aresta_lista(int origem, int destino){
 }
 
 void Grafo::remover_aresta(int origem, int destino){
-    if(origem < 0 || origem >= capacidade ||
-       destino < 0 || destino >= capacidade)
+    if(origem < 0 || origem >= tamanho ||
+       destino < 0 || destino >= tamanho)
         return;
     if(!existe_aresta(origem, destino))
         return;
@@ -149,12 +194,12 @@ void Grafo::remover_aresta(int origem, int destino){
         }
     }else if(representacao=='M'){
         matriz[origem][destino]=0;
-        if(!direcionado)
+        if(direcionado)
             matriz[destino][origem]=0;
     }
 }
 void Grafo::remover_vertice(int id_vertice){
-    if(id_vertice < 0 || id_vertice >= capacidade)
+    if(id_vertice < 0 || id_vertice >= tamanho)
         return;
     if(!ativo[id_vertice])
         return;
@@ -166,17 +211,17 @@ void Grafo::remover_vertice(int id_vertice){
             delete temp;
         }
         //Removendo arestas entrando no vértice
-        for(int i=0; i<capacidade; i++){
+        for(int i=0; i<tamanho; i++){
             if(ativo[i] && i != id_vertice){
                 remover_aresta(i, id_vertice);
             }
         }
     }else if(representacao=='M'){
         //removendo vertices entrando e saindo
-        for(int i=0; i<capacidade; i++){
+        for(int i=0; i<tamanho; i++){
             if(ativo[i]&&i!=id_vertice){
                 remover_aresta(i, id_vertice);
-                if(direcionado)
+                if(!direcionado)
                     remover_aresta(id_vertice,i);
             }
 
@@ -188,7 +233,7 @@ void Grafo::remover_vertice(int id_vertice){
 
 void Grafo::imprimir_grafo(){
     if(representacao=='L'){
-        for(int i=0; i<capacidade; i++){
+        for(int i=0; i<tamanho; i++){
             if(ativo[i]){
                 std::cout << i << ": ";
                 Aresta* atual = listas[i];
@@ -200,10 +245,10 @@ void Grafo::imprimir_grafo(){
             }
         }
     }else if(representacao=='M'){
-        for(int i=0; i<capacidade; i++){
+        for(int i=0; i<tamanho; i++){
             if(!ativo[i])
                 continue;
-            for(int j=0; j<capacidade; j++){
+            for(int j=0; j<tamanho; j++){
                 std::cout << matriz[i][j] << "  ";
             }
             std::cout << std::endl;
@@ -220,19 +265,19 @@ void Grafo::mudar_representacao(char nova_representacao){
     // LISTA -> MATRIZ
     if(representacao == 'L' && nova_representacao == 'M'){
 
-        int** nova_matriz = new int*[capacidade];
+        int** nova_matriz = new int*[tamanho];
 
-        for(int i = 0; i < capacidade; i++){
+        for(int i = 0; i < tamanho; i++){
 
-            nova_matriz[i] = new int[capacidade];
+            nova_matriz[i] = new int[tamanho];
 
-            for(int j = 0; j < capacidade; j++){
+            for(int j = 0; j < tamanho; j++){
                 nova_matriz[i][j] = 0;
             }
         }
 
         // copiar arestas
-        for(int i = 0; i < capacidade; i++){
+        for(int i = 0; i < tamanho; i++){
 
             Aresta* atual = listas[i];
 
@@ -245,7 +290,7 @@ void Grafo::mudar_representacao(char nova_representacao){
         }
 
         // liberar listas antigas
-        for(int i = 0; i < capacidade; i++){
+        for(int i = 0; i < tamanho; i++){
 
             Aresta* atual = listas[i];
 
@@ -271,16 +316,16 @@ void Grafo::mudar_representacao(char nova_representacao){
     // MATRIZ -> LISTA
     else if(representacao == 'M' && nova_representacao == 'L'){
 
-        Aresta** novas_listas = new Aresta*[capacidade];
+        Aresta** novas_listas = new Aresta*[tamanho];
 
-        for(int i = 0; i < capacidade; i++){
+        for(int i = 0; i < tamanho; i++){
             novas_listas[i] = nullptr;
         }
 
         // copiar arestas
-        for(int i = 0; i < capacidade; i++){
+        for(int i = 0; i < tamanho; i++){
 
-            for(int j = 0; j < capacidade; j++){
+            for(int j = 0; j < tamanho; j++){
 
                 if(matriz[i][j] != 0){
 
@@ -296,7 +341,7 @@ void Grafo::mudar_representacao(char nova_representacao){
         }
 
         // liberar matriz antiga
-        for(int i = 0; i < capacidade; i++){
+        for(int i = 0; i < tamanho; i++){
             delete[] matriz[i];
         }
 
@@ -309,3 +354,4 @@ void Grafo::mudar_representacao(char nova_representacao){
         representacao = 'L';
     }
 }
+
