@@ -37,6 +37,15 @@ class Grafo{
         void mudar_representacao(char nova_representacao);
 
         void aumentar_capacidade();
+        
+        int retorna_num_arestas_entrando(int id);
+        int retorna_num_arestas_saindo(int id);
+        int retorna_num_vertices_amigos(int id);
 
+        int* listar_arestas_entrando(int id);//seguidores
+        int* listar_arestas_saindo(int id);//seguindo
+        int* listar_vertices_amigos(int id);//amigos
+
+        void configurar(bool direcionando, char representacao);
 };
 #endif

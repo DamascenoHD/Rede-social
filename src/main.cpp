@@ -15,17 +15,23 @@ int main() {
     Grafo grafo_social;
     Grafo grafo_temas;
     Dicionario dicionario;
-    char modo = '\0';
     char representacao = '\0';
+    bool primeira_representacao = true;
     while (std::getline(std::cin, linha)) {
         std::stringstream ss(linha);
         char tipo;
         if (!(ss >> tipo)) continue;
         if(tipo == 'A'){
-            if(!(ss >> representacao)){
-                continue;
+            ss >> representacao;
+            if(primeira_representacao){
+                grafo_social.configurar(true, representacao);
+                grafo_temas.configurar(false, representacao);
+                primeira_representacao = false;
+            }else{
+                grafo_social.mudar_representacao(representacao);
+                grafo_temas.mudar_representacao(representacao);
             }
-            cout << "A" << representacao << endl;
+            cout << "A " << representacao << endl;
         }else if(tipo == 'T'){
             string nome;
             char tipo_tema;
@@ -34,7 +40,8 @@ int main() {
             Tema tema = Tema(nome, dicionario.get_qnt_temas(), tipo_tema);
             dicionario.inserir_tema(tema);
             No no_tema(tema.get_id(), 'T');
-            cout << "T" << tema.get_id() << endl;
+            grafo_temas.inserir_vertice(no_tema);
+            cout << "T " << tema.get_id() << endl;
         }else if(tipo == 'U'){
             string nome;
             int idade;
@@ -60,26 +67,60 @@ int main() {
             int id_1, id_2;
             ss >> id_1 >> id_2;
             grafo_social.inserir_aresta(id_1, id_2);
+            cout << "S " << dicionario.recuperar_usuario(id_1).get_nome() << " " << dicionario.recuperar_usuario(id_2).get_nome() << endl;
         }else if(tipo == 'R'){
             int id_1, id_2;
             ss >> id_1 >> id_2;
             grafo_social.remover_aresta(id_1, id_2);//a remoção da aresta é direcionada, talvez seja necessário mudar
+            cout << "R " << dicionario.recuperar_usuario(id_1).get_nome() << " " << dicionario.recuperar_usuario(id_2).get_nome() << endl;
         }else if(tipo == 'L'){
             char subtipo;
             int id_usuario;
             ss >> subtipo;
             if(subtipo == 'T'){
                 ss >> id_usuario;
-                //adicionar função listar em grafos
+                int tam;
+                tam = grafo_temas.retorna_num_arestas_saindo(id_usuario);
+                int* temas = new int[tam];
+                temas = grafo_temas.listar_arestas_saindo(id_usuario);
+                cout << "LT " << dicionario.recuperar_usuario(id_usuario).get_nome() << " ";
+                for(int i=0; i<tam; i++){
+                    cout << dicionario.recuperar_tema(temas[i]).get_nome() << " ";
+                }
+                cout << endl;
             }else if (subtipo == 'C'){
                 ss >> id_usuario;
-                //adicionar função listar em grafos
+                int tam;
+                tam = grafo_social.retorna_num_arestas_entrando(id_usuario);
+                int* seguidores = new int[tam];
+                seguidores = grafo_social.listar_arestas_entrando(id_usuario);
+                cout << "LC " << dicionario.recuperar_usuario(id_usuario).get_nome() << " ";
+                for(int i=0; i<tam; i++){
+                    cout << dicionario.recuperar_usuario(seguidores[i]).get_nome() << " ";
+                }
+                cout << endl;
             }else if(subtipo == 'S'){
                 ss >> id_usuario;
-                //adicionar função listar em grafos
+                int tam;
+                tam = grafo_social.retorna_num_arestas_saindo(id_usuario);
+                int* seguidos = new int[tam];
+                seguidos = grafo_social.listar_arestas_saindo(id_usuario);
+                cout << "LS " << dicionario.recuperar_usuario(id_usuario).get_nome() << " ";
+                for(int i=0; i<tam; i++){
+                    cout << dicionario.recuperar_usuario(seguidos[i]).get_nome() << " ";
+                }
+                cout << endl;
             }else if(subtipo == 'A'){
                 ss >> id_usuario;
-                //adicionar função listar em grafos
+                int tam;
+                tam = grafo_social.retorna_num_vertices_amigos(id_usuario);
+                int* amigos = new int[tam];
+                amigos = grafo_social.listar_vertices_amigos(id_usuario);
+                cout << "LA " << dicionario.recuperar_usuario(id_usuario).get_nome() << " ";
+                for(int i=0; i<tam; i++){
+                    cout << dicionario.recuperar_usuario(amigos[i]).get_nome() << " ";
+                }
+                cout << endl;
             }
         }else if(tipo == 'Q'){
             int id_1, id_2;
@@ -88,24 +129,27 @@ int main() {
             bool um_segue_2, dois_segue_1;
             um_segue_2 = grafo_social.existe_aresta(id_1, id_2);
             dois_segue_1 = grafo_social.existe_aresta(id_2, id_1);
-            if(um_segue_2 ^ dois_segue_1){
-                valor = 1;
+            if(um_segue_2 != dois_segue_1){
+                if(um_segue_2)
+                    valor = 1;
+                else if(dois_segue_1)
+                    valor = 2;
             }else if(um_segue_2 && dois_segue_1){
-                valor = 2;
+                valor = 3;
             }
-            cout << "Q " << dicionario.recuperar_usuario(id_1).get_nome() << " " << dicionario.recuperar_usuario(id_2).get_nome() << endl;
+            cout << "Q " << dicionario.recuperar_usuario(id_1).get_nome() << " " << dicionario.recuperar_usuario(id_2).get_nome() << " " << valor << endl;
         }else if(tipo == 'G'){
              int id_usuario, id_tema;
              int valor = 0;
              ss >> id_usuario >> id_tema;
              if(grafo_temas.existe_aresta(id_usuario, id_tema))
                 valor = 1;
-            cout << "G " << dicionario.recuperar_usuario(id_usuario).get_nome() << " " << dicionario.recuperar_tema(id_tema).get_nome() << endl;
+            cout << "G " << dicionario.recuperar_usuario(id_usuario).get_nome() << " " << dicionario.recuperar_tema(id_tema).get_nome() << " " << valor << endl;
         }else if(tipo == 'F'){
             int id_tema;
             int quantidade = 0;
             ss >> id_tema;
-            //fazer função que retorna quantos vértices to ligados nessa aresta
+            quantidade = grafo_temas.retorna_num_arestas_entrando(id_tema);
             cout << "F " << dicionario.recuperar_tema(id_tema).get_nome() << " " << quantidade << endl;
         }
         

@@ -194,7 +194,7 @@ void Grafo::remover_aresta(int origem, int destino){
         }
     }else if(representacao=='M'){
         matriz[origem][destino]=0;
-        if(direcionado)
+        if(!direcionado)
             matriz[destino][origem]=0;
     }
 }
@@ -355,3 +355,98 @@ void Grafo::mudar_representacao(char nova_representacao){
     }
 }
 
+int* Grafo::listar_arestas_entrando(int id){
+    if(id < 0 || id >= tamanho || !ativo[id])
+        return nullptr;
+    int num_arestas_entrando = retorna_num_arestas_entrando(id);
+    int qnt_ja_no_vetor = 0;
+    int* arestas_entrando = new int[num_arestas_entrando];
+    for(int i=0; i<tamanho; i++){
+        if(!ativo[i])
+            continue;
+        if(existe_aresta(i, id)){
+            arestas_entrando[qnt_ja_no_vetor] = i;
+            qnt_ja_no_vetor++;
+            if(qnt_ja_no_vetor==num_arestas_entrando)
+            break;
+        }
+    }
+    return arestas_entrando;
+}
+int* Grafo::listar_arestas_saindo(int id){
+    if(id < 0 || id >= tamanho || !ativo[id])
+        return nullptr;
+    int num_arestas_saindo = retorna_num_arestas_saindo(id);
+    int qnt_ja_no_vetor = 0;
+    int* arestas_saindo = new int[num_arestas_saindo];
+    for(int i=0; i<tamanho; i++){
+        if(!ativo[i])
+            continue;
+        if(existe_aresta(id, i)){
+            arestas_saindo[qnt_ja_no_vetor] = i;
+            qnt_ja_no_vetor++;
+            if(qnt_ja_no_vetor==num_arestas_saindo)
+            break;
+        }
+    }
+    return arestas_saindo;
+}
+
+int* Grafo::listar_vertices_amigos(int id){
+    if(id < 0 || id >= tamanho || !ativo[id])
+        return nullptr;
+    int num_amigos = retorna_num_vertices_amigos(id);
+    int qnt_ja_no_vetor = 0;
+    int* vertices_amigos = new int[num_amigos];
+    for(int i=0; i<tamanho; i++){
+        if(!ativo[i])
+            continue;
+        if(existe_aresta(i, id)&&existe_aresta(id, i)){
+            vertices_amigos[qnt_ja_no_vetor] = i;
+            qnt_ja_no_vetor++;
+            if(qnt_ja_no_vetor==num_amigos)
+            break;
+        }
+    }
+    return vertices_amigos;
+}
+
+int Grafo::retorna_num_arestas_entrando(int id){
+    int num = 0;
+    for(int i=0; i<tamanho; i++){
+        if(existe_aresta(i, id))
+            num++;
+    }
+    return num;
+}
+
+int Grafo::retorna_num_arestas_saindo(int id){
+    int num = 0;
+    for(int i=0; i<tamanho; i++){
+        if(existe_aresta(id, i))
+            num++;
+    }
+    return num;
+}
+
+int Grafo::retorna_num_vertices_amigos(int id){
+    int num = 0;
+    for(int i=0; i<tamanho; i++){
+        if(existe_aresta(id, i) && existe_aresta(i, id))
+            num++;
+    }
+    return num;
+}
+
+void Grafo::configurar(bool direcionado, char representacao){
+    this->direcionado = direcionado;
+    this->representacao = representacao;
+
+    tamanho = 0;
+    num_vertices = 0;
+
+    vertices = nullptr;
+    ativo = nullptr;
+    listas = nullptr;
+    matriz = nullptr;
+}
