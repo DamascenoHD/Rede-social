@@ -68,11 +68,11 @@ void Grafo::inserir_vertice(No no){
         
         if(representacao=='L'){
             Aresta** novas_listas = new Aresta*[tamanho + 1];
-
+            //inicializando novas_listas
             for(int i = 0; i < tamanho + 1; i++){
                 novas_listas[i] = nullptr;
             }
-
+            //copiando
             for(int i = 0; i < tamanho; i++){
                 novas_listas[i] = listas[i];
             }
@@ -355,7 +355,7 @@ void Grafo::mudar_representacao(char nova_representacao){
     }
 }
 
-int* Grafo::listar_arestas_entrando(int id){
+int* Grafo::arestas_entrando(int id){
     if(id < 0 || id >= tamanho || !ativo[id])
         return nullptr;
     int num_arestas_entrando = retorna_num_arestas_entrando(id);
@@ -373,7 +373,7 @@ int* Grafo::listar_arestas_entrando(int id){
     }
     return arestas_entrando;
 }
-int* Grafo::listar_arestas_saindo(int id){
+int* Grafo::arestas_saindo(int id){
     if(id < 0 || id >= tamanho || !ativo[id])
         return nullptr;
     int num_arestas_saindo = retorna_num_arestas_saindo(id);
@@ -391,8 +391,7 @@ int* Grafo::listar_arestas_saindo(int id){
     }
     return arestas_saindo;
 }
-
-int* Grafo::listar_vertices_amigos(int id){
+int* Grafo::vertices_amigos(int id){
     if(id < 0 || id >= tamanho || !ativo[id])
         return nullptr;
     int num_amigos = retorna_num_vertices_amigos(id);

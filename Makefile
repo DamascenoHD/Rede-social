@@ -20,7 +20,7 @@ SRCS = $(SRC_DIR)/main.cpp \
 OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 # Executável obrigatório
-TARGET = $(BIN_DIR)/tp1.out
+TARGET = $(BIN_DIR)/tp2.out
 
 # Regra principal
 all: $(TARGET)

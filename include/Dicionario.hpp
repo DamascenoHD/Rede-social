@@ -38,7 +38,6 @@ class Dicionario{
         int get_qnt_nos_usuario_tema();
         int get_qnt_nos_temas();
 
-        void aumentar_capacidade();
 };
 
 #endif
